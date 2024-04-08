@@ -97,7 +97,7 @@ const PasswordList = ({navigation}: any) => {
 
   const handleShare = async (password: User) => {
     try {
-      const message = `URL: ${password.url}\nUsername: ${password.username}\nPassword: ${password.password}`;
+      const message = `URL: ${password.url}\nUsername: ${password.username}\nPassword: ${password.password} \nNote: ${password.note}`;
       await Share.share({
         message: message,
       });

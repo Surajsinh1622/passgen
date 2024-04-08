@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Modal, TextInput, Button, StyleSheet, Text} from 'react-native';
 import {User} from './interfaces';
 import {savePassword, updatePassword} from './database';
@@ -15,17 +15,28 @@ const PasswordModal = ({
   password?: User | null;
 }) => {
   const [formData, setFormData] = useState<User>({
-    id: password ? password.id : -1,
-    url: password ? password.url : '',
-    username: password ? password.username : '',
-    password: password ? password.password : '',
-    note: password ? password.note : '',
+    id: -1,
+    url: '',
+    username: '',
+    password: '',
+    note: '',
     showPass: false,
   });
 
+  useEffect(() => {
+    setFormData({
+      id: password ? password.id : -1,
+      url: password ? password.url : '',
+      username: password ? password.username : '',
+      password: password ? password.password : '',
+      note: password ? password.note : '',
+      showPass: false,
+    });
+  }, [password]);
+
   const savePasswordData = async () => {
     if (formData.id === -1) {
-      const formDataWithoutId = {...formData};
+      const formDataWithoutId: any = {...formData};
       delete formDataWithoutId.id;
 
       await savePassword(formDataWithoutId);
@@ -35,6 +46,14 @@ const PasswordModal = ({
     }
     fetchData();
     setVisible(false);
+    setFormData({
+      id: -1,
+      url: '',
+      username: '',
+      password: '',
+      note: '',
+      showPass: false,
+    });
   };
 
   const isAnyFieldEmpty = () => {
@@ -57,7 +76,6 @@ const PasswordModal = ({
             onChangeText={text => setFormData(prev => ({...prev, url: text}))}
           />
           <Text style={styles.label}>Username:</Text>
-
           <TextInput
             style={styles.input}
             placeholder="Username"
@@ -67,7 +85,6 @@ const PasswordModal = ({
             }
           />
           <Text style={styles.label}>Password:</Text>
-
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -78,7 +95,6 @@ const PasswordModal = ({
             secureTextEntry={true}
           />
           <Text style={styles.label}>Note:</Text>
-
           <TextInput
             style={styles.input}
             placeholder="Notes"

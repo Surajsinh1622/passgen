@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     padding: 10,
     borderRadius: 10,
+    color: 'black',
   },
   inputContainer: {
     flexDirection: 'row',
