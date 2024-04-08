@@ -33,9 +33,11 @@ export default function GeneratedPassword() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Password Generator</Text>
+      <Text selectable={true} selectionColor="orange" style={styles.title}>
+        {generatedPassword}
+      </Text>
       <View style={styles.inputContainer}>
-        <Text>Password Length:</Text>
+        <Text style={styles.label}>Password Length:</Text>
         <Button
           title="-"
           onPress={() => setPasswordLength(prev => Math.max(prev - 1, 4))}
@@ -47,27 +49,21 @@ export default function GeneratedPassword() {
         />
       </View>
       <View style={styles.switchContainer}>
-        <Text>Include Uppercase:</Text>
+        <Text style={styles.label}>Include Uppercase:</Text>
         <Switch value={includeUpperCase} onValueChange={setIncludeUpperCase} />
       </View>
       <View style={styles.switchContainer}>
-        <Text>Include Lowercase:</Text>
+        <Text style={styles.label}>Include Lowercase:</Text>
         <Switch value={includeLowerCase} onValueChange={setIncludeLowerCase} />
       </View>
       <View style={styles.switchContainer}>
-        <Text>Include Numbers:</Text>
+        <Text style={styles.label}>Include Numbers:</Text>
         <Switch value={includeNumbers} onValueChange={setIncludeNumbers} />
       </View>
       <View style={styles.switchContainer}>
-        <Text>Include Symbols:</Text>
+        <Text style={styles.label}>Include Symbols:</Text>
         <Switch value={includeSymbols} onValueChange={setIncludeSymbols} />
       </View>
-      <Text
-        selectable={true}
-        selectionColor="orange"
-        style={styles.generatedPassword}>
-        {generatedPassword}
-      </Text>
     </View>
   );
 }
@@ -83,18 +79,15 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'black',
+    padding: 10,
+    borderRadius: 10,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 5,
-    width: 50,
   },
   switchContainer: {
     flexDirection: 'row',
@@ -109,5 +102,11 @@ const styles = StyleSheet.create({
   },
   lengthText: {
     marginHorizontal: 10,
+    color: 'black',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 4,
+    color: 'gray',
   },
 });

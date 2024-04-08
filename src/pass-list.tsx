@@ -6,13 +6,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Modal,
-  TextInput,
   Button,
   Share,
 } from 'react-native';
 import SQLite from 'react-native-sqlite-storage';
 import {User} from './interfaces';
+import PasswordModal from './password';
 
 const db = SQLite.openDatabase(
   {
@@ -23,7 +22,7 @@ const db = SQLite.openDatabase(
   error => console.error('Error opening database:', error),
 );
 
-const PasswordList = () => {
+const PasswordList = ({navigation}: any) => {
   const [passwords, setPasswords] = useState<User[]>([]);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editedPassword, setEditedPassword] = useState<User | null>(null);
@@ -86,30 +85,6 @@ const PasswordList = () => {
     setEditModalVisible(true);
   };
 
-  const saveEditedPassword = () => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'UPDATE passwords SET url = ?, username = ?, password = ? WHERE id = ?',
-        [
-          editedPassword?.url,
-          editedPassword?.username,
-          editedPassword?.password,
-          editedPassword?.id,
-        ],
-        () => {
-          console.log('Password updated successfully.');
-          fetchData(); // Refresh password list after updating
-          setEditModalVisible(false); // Close modal after saving
-        },
-        (_, error) => {
-          console.error('Failed to update password:', error);
-        },
-      );
-    });
-    setEditModalVisible(false);
-    fetchData(); // Refresh password list after updating
-  };
-
   const togglePasswordVisibility = (id: number) => {
     const updatedPasswords = passwords.map((pass: User) => {
       if (pass.id === id) {
@@ -133,14 +108,17 @@ const PasswordList = () => {
 
   const renderPasswordItem = ({item}: {item: User}) => (
     <View style={styles.passwordItem}>
-      <Text selectable={true} selectionColor="orange">
+      <Text style={styles.label} selectable={true} selectionColor="orange">
         URL: {item.url}
       </Text>
-      <Text selectable={true} selectionColor="orange">
+      <Text style={styles.label} selectable={true} selectionColor="orange">
         Username: {item.username}
       </Text>
-      <Text selectable={true} selectionColor="orange">
+      <Text style={styles.label} selectable={true} selectionColor="orange">
         Password: {item.showPass ? item.password : '******'}
+      </Text>
+      <Text style={styles.label} selectable={true} selectionColor="orange">
+        Note: {item.note}
       </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={() => handleEditPassword(item)}>
@@ -161,58 +139,34 @@ const PasswordList = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.buttonMargin}>
+        <Button
+          title="Generate Password"
+          onPress={() => {
+            navigation.navigate('passgen');
+          }}
+        />
+      </View>
+      <View style={styles.buttonMargin}>
+        <Button
+          title="Add Password"
+          onPress={() => {
+            setEditedPassword(null);
+            setEditModalVisible(true);
+          }}
+        />
+      </View>
       <FlatList
         data={passwords}
         renderItem={renderPasswordItem}
         keyExtractor={(item: User) => item.id.toString()}
       />
-      <Modal
-        animationType="slide"
-        transparent={true}
+      <PasswordModal
         visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Edit Data</Text>
-            <Text style={styles.modalLabel}>URL:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="URL"
-              value={editedPassword?.url}
-              onChangeText={text =>
-                setEditedPassword((prev: any) => ({...prev, url: text}))
-              }
-            />
-            <Text style={styles.modalLabel}>Username:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={editedPassword?.username}
-              onChangeText={text =>
-                setEditedPassword((prev: any) => ({...prev, username: text}))
-              }
-            />
-            <Text style={styles.modalLabel}>Password:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={editedPassword?.password}
-              secureTextEntry={true}
-              onChangeText={text =>
-                setEditedPassword((prev: any) => ({...prev, password: text}))
-              }
-            />
-            <View style={styles.buttonContainer}>
-              <Button title="Save" onPress={saveEditedPassword} />
-              <Button
-                title="Cancel"
-                color="red"
-                onPress={() => setEditModalVisible(false)}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        setVisible={setEditModalVisible}
+        fetchData={fetchData}
+        password={editedPassword}
+      />
     </View>
   );
 };
@@ -222,21 +176,28 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  label: {
+    fontSize: 16,
+    marginBottom: 4,
+    color: 'gray',
+  },
   passwordItem: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 10,
+    marginTop: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
+  buttonMargin: {
+    marginTop: 10,
+  },
   button: {
     color: 'blue',
-    textDecorationLine: 'underline',
   },
   centeredView: {
     flex: 1,
@@ -251,6 +212,7 @@ const styles = StyleSheet.create({
     padding: 35,
     alignItems: 'center',
     shadowColor: '#000',
+    width: 320,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -265,16 +227,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    width: '100%',
+    width: 300,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 15,
+    color: 'black',
   },
   modalLabel: {
     fontWeight: 'bold',
     marginBottom: 5,
+    color: 'black',
   },
 });
 
